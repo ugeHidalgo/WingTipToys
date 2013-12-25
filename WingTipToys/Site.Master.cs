@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using WingTipToys.Models;
 
 namespace WingTipToys
 {
@@ -68,6 +69,15 @@ namespace WingTipToys
         protected void Page_Load(object sender, EventArgs e)
         {
 
+        }
+
+        public IQueryable<Category> GetCategories()
+        {
+
+            var aPC = new ProductContext();
+            IQueryable<Category> query = from c in aPC.Categories
+                                         select c;
+            return query;            
         }
     }
 }

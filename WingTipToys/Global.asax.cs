@@ -6,6 +6,8 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using System.Web.Security;
 using WingTipToys;
+using System.Data.Entity;
+using WingTipToys.Models;
 
 namespace WingTipToys
 {
@@ -17,6 +19,7 @@ namespace WingTipToys
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             AuthConfig.RegisterOpenAuth();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            Database.SetInitializer(new ProductDatabaseInitializer());
         }
 
         void Application_End(object sender, EventArgs e)
