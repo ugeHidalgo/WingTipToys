@@ -75,8 +75,7 @@ namespace WingTipToys
         {
 
             var aPC = new ProductContext();
-            IQueryable<Category> query = from c in aPC.Categories
-                                         select c;
+            IQueryable<Category> query = aPC.Categories;                                     
             return query;            
         }
     }
