@@ -9,7 +9,7 @@ namespace WingTipToys.Logic
     public class ShoppingCartActions
     {
         public string ShoppingCartId { get; set; }
-        private ProductContext myDBContext = new ProductContext();
+        private ProductContext _myDBContext = new ProductContext();
         public const string CartSessionKey = "CartId";
 
 
@@ -17,26 +17,28 @@ namespace WingTipToys.Logic
         {
             ShoppingCartId = GetCartId();
 
-            var cartItem = myDBContext.CartItems.SingleOrDefault(
+            var cartItem = _myDBContext.ShoppingCartItems.SingleOrDefault(
                     (c => c.CartId == ShoppingCartId &&  c.ProductId == id  )
                 );
             if (cartItem == null)
             {
-                cartItem = new CartItem();
-                cartItem.ItemId = Guid.NewGuid().ToString();
-                cartItem.ProductId = id;
-                cartItem.Product = myDBContext.Products.SingleOrDefault(
-                     p => p.ProductID == id);
-                cartItem.Quantity = 1;
-                cartItem.DateCreated = DateTime.Now;
-
-                myDBContext.CartItems.Add(cartItem);
+                cartItem = new CartItem
+                {
+                    ItemId = Guid.NewGuid().ToString(),
+                    CartId = ShoppingCartId,
+                    ProductId = id,
+                    Product = _myDBContext.Products.SingleOrDefault(
+                             p => p.ProductID == id),
+                    Quantity = 1,
+                    DateCreated = DateTime.Now
+                };
+                _myDBContext.ShoppingCartItems.Add(cartItem);
             }
             else
             { //The item exists into the cart so add one more
                 cartItem.Quantity++;
             }
-            myDBContext.SaveChanges();
+            _myDBContext.SaveChanges();
         }
 
         public string GetCartId()
@@ -60,12 +62,23 @@ namespace WingTipToys.Logic
         public List<CartItem> GetCartItems()
         {
             ShoppingCartId = GetCartId();
-            List<CartItem> query = myDBContext.CartItems.Where(c => c.CartId == ShoppingCartId).ToList();
-                //(from cItems in myDBContext.CartItems
-                //                    where (cItems.CartId == ShoppingCartId)
-                //                    select cItems).ToList();
+            //List<CartItem> query = myDBContext.CartItems.Where(c => c.CartId == ShoppingCartId).ToList();
+            List<CartItem> query = (from cItems in _myDBContext.ShoppingCartItems
+             where (cItems.CartId == ShoppingCartId)
+             select cItems).ToList();
             return query;
 
+        }
+
+
+        public decimal GetTotal()
+        {
+            ShoppingCartId = GetCartId();
+            decimal? total = 0;
+            total = (decimal?)(from cI in _myDBContext.ShoppingCartItems
+                               where cI.CartId == ShoppingCartId
+                               select (int?)cI.Quantity * cI.Product.UnitPrice ).Sum();
+            return total ?? decimal.Zero;
         }
     }
 }
